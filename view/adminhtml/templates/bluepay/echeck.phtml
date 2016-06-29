@@ -1,0 +1,47 @@
+<?php
+/**
+ * Copyright © 2016 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// @codingStandardsIgnoreFile
+/**
+ * @var \Magento\Payment\Block\Adminhtml\Transparent\Form $block
+ */
+$code = $block->escapeHtml($block->getMethodCode());
+?>
+<fieldset class="admin__fieldset payment-method" id="payment_form_<?php /* @noEscape */ echo $code; ?>"
+          style="display:none">
+    <div class="field-date admin__field _required">
+        <label class="admin__field-label" for="<?php /* @noEscape */ echo $code; ?>_echeck_acct_type">
+            <span><?php echo $block->escapeHtml(__('Account Type')); ?></span>
+        </label>
+        <div class="admin__field-control">
+            <select id="<?php /* @noEscape */ echo $code ?>_expiration" name="payment[echeck_acct_type]"
+                    class="admin__control-select admin__control-select-month validate-cc-exp required-entry">
+                    <option value="C">Checking</option>
+                    <option value="S">Savings</option>
+            </select>
+        </div>
+    </div>
+    <div class="field-number admin__field _required">
+        <label class="admin__field-label" for="<?php /* @noEscape */ echo $code; ?>_echeck_acct_number">
+            <span><?php echo $block->escapeHtml(__('Account Number')); ?></span>
+        </label>
+        <div class="admin__field-control">
+            <input type="text" id="<?php /* @noEscape */ echo $code; ?>_echeck_acct_number" name="payment[echeck_acct_number]"
+                   title="<?php echo $block->escapeHtml(__('Account Number')); ?>" class="admin__control-text validate-cc-number"
+                   value="<?php /* @noEscape */ echo $block->getInfoData('echeck_acct_number'); ?>"/>
+        </div>
+    </div>
+    <div class="field-number admin__field _required">
+        <label class="admin__field-label" for="<?php /* @noEscape */ echo $code; ?>_echeck_routing_number">
+            <span><?php echo $block->escapeHtml(__('Routing Number')); ?></span>
+        </label>
+        <div class="admin__field-control">
+            <input type="text" id="<?php /* @noEscape */ echo $code; ?>_echeck_routing_number" name="payment[echeck_routing_number]"
+                   title="<?php echo $block->escapeHtml(__('Routing Number')); ?>" class="admin__control-text validate-cc-number"
+                   value="<?php /* @noEscape */ echo $block->getInfoData('echeck_routing_number'); ?>"/>
+        </div>
+    </div>
+</fieldset>
