@@ -10,7 +10,7 @@
         "php": "~5.5.0|~5.6.0",
         "magento/magento-composer-installer": "*"
     },
-    "authors": [
+    "authors":
     {
       "name": "Justin Slingerland",
       "email": "jslingerland@bluepay.com",
