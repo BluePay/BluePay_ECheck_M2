@@ -19,4 +19,4 @@ php bin/magento module:enable BluePay_ECheck --clear-static-content
 php bin/magento setup:upgrade
 ```
 
-At this point, the module should be fully installed. Finally, log into your Magento admin section and navigate to Stores -> Configuration -> Sales -> Payment Methods -> BluePay ECheck to finish the setup.
+At this point, the module should be fully installed. Finally, log into your Magento admin section and navigate to Stores -> Configuration -> Sales -> Payment Methods -> BluePay (E-Check) to finish the setup.
