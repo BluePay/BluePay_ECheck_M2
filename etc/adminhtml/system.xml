@@ -30,14 +30,14 @@
                     <label>Transaction Type</label>
                     <source_model>BluePay\ECheck\Model\Source\TransactionType</source_model>
                 </field>
-                <field id="cctypes" translate="label" type="multiselect" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="0">
+                <!--<field id="cctypes" translate="label" type="multiselect" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Credit Card Types</label>
                     <source_model>BluePay\ECheck\Model\Source\Cctype</source_model>
                 </field>
                 <field id="useccv" translate="label" type="select" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Credit Card Verification</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
+                </field>-->
                 <!--<field id="useccv_backend" translate="label" type="select" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Credit Card Verification (Backend)</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
