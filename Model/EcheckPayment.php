@@ -62,13 +62,13 @@ class ECheckPayment extends \Magento\Payment\Model\Method\Cc
     const RESPONSE_CODE_MISSING  = 'MISSING';
     const RESPONSE_CODE_HELD     = 4;
 
-	protected $responseHeaders;
-	protected $tempVar;
+    protected $responseHeaders;
+    protected $tempVar;
 
     protected $_code  = 'bluepay_echeck';
-	//protected $_formBlockType = 'echeck/form';
-	protected static $_dupe = true;
-	protected static $_underscoreCache = array();
+    //protected $_formBlockType = 'echeck/form';
+    protected static $_dupe = true;
+    protected static $_underscoreCache = array();
 
     protected $_countryFactory;
 
@@ -90,19 +90,14 @@ class ECheckPayment extends \Magento\Payment\Model\Method\Cc
     protected $_canUseInternal          = true;
     protected $_canUseCheckout          = true;
     protected $_canUseForMultishipping  = true;
-    protected $_canSaveCc 		= false;
+    protected $_canSaveCc       = false;
 
     /**
      * Fields that should be replaced in debug with '***'
      *
      * @var array
      */
-    protected $_debugReplacePrivateDataKeys = array('x_login', 'x_tran_key',
-                                                    'x_card_num', 'x_exp_date',
-                                                    'x_card_code', 'x_bank_aba_code',
-                                                    'x_bank_name', 'x_bank_acct_num',
-                                                    'x_bank_acct_type','x_bank_acct_name',
-                                                    'x_echeck_type');
+    protected $_debugReplacePrivateDataKeys = array('ach_account');
 
     /**
      * @var \Magento\Authorizenet\Helper\Data
@@ -256,16 +251,16 @@ class ECheckPayment extends \Magento\Payment\Model\Method\Cc
      */
     public function capture(\Magento\Payment\Model\InfoInterface $payment, $amount)
     {
-	$payment->setAmount($amount);
-	//$result =$this->_checkDuplicate($payment);
+    $payment->setAmount($amount);
+    //$result =$this->_checkDuplicate($payment);
     $payment->setTransactionType(self::REQUEST_TYPE_AUTH_CAPTURE);
-	$payment->setRrno($payment->getCcTransId());
+    $payment->setRrno($payment->getCcTransId());
         $request = $this->_buildRequest($payment);
         $result = $this->_postRequest($request); 
         if ($result->getResult() == self::RESPONSE_CODE_APPROVED) {
             $payment->setStatus(self::STATUS_APPROVED);
-			//if ($payment->getCcType() == '') $payment->setCcType($result->getCardType());
-			//if ($payment->getCcLast4() == '') $payment->setCcLast4(substr($result->getCcNumber(), -4));
+            //if ($payment->getCcType() == '') $payment->setCcType($result->getCardType());
+            //if ($payment->getCcLast4() == '') $payment->setCcLast4(substr($result->getCcNumber(), -4));
             ////$payment->setCcTransId($result->getTransactionId());
             $payment->setLastTransId($result->getRrno());
             if (!$payment->getParentTransactionId() || $result->getRrno() != $payment->getParentTransactionId()) {
@@ -273,33 +268,33 @@ class ECheckPayment extends \Magento\Payment\Model\Method\Cc
             }
             return $this;
         }
-	switch ($result->getResult()) {
-		case self::RESPONSE_CODE_DECLINED:
-			throw new \Magento\Framework\Exception\LocalizedException(__('The transaction has been declined.'));
-		case self::RESPONSE_CODE_ERROR || self::RESPONSE_CODE_MISSING:
-			if ($result->getMessage() == 'Already%20Captured') {
-				$payment->setTransactionType(self::REQUEST_TYPE_AUTH_CAPTURE);
-				$request=$this->_buildRequest($payment);
-				$result =$this->_postRequest($request);
-				        if ($result->getResult() == self::RESPONSE_CODE_APPROVED && $result->getMessage() != 'DUPLICATE') {
-            					$payment->setStatus(self::STATUS_APPROVED);
-            					$payment->setLastTransId($result->getRrno());
-            					if (!$payment->getParentTransactionId() || $result->getRrno() != $payment->getParentTransactionId()) {
-                					$payment->setTransactionId($result->getRrno());
-            					}
-            					return $this;
-        				} else {
-						throw new \Magento\Framework\Exception\LocalizedException(Mage::helper('paygate')->__('Error: ' . $result->getMessage()));
-					}
-			} else {
-				throw new \Magento\Framework\Exception\LocalizedException(__('Error: ' . $result->getMessage()));
-			}
-		default:
-			throw new \Magento\Framework\Exception\LocalizedException(__('An error has occured with your payment.'));
-	}
+    switch ($result->getResult()) {
+        case self::RESPONSE_CODE_DECLINED:
+            throw new \Magento\Framework\Exception\LocalizedException(__('The transaction has been declined.'));
+        case self::RESPONSE_CODE_ERROR || self::RESPONSE_CODE_MISSING:
+            if ($result->getMessage() == 'Already%20Captured') {
+                $payment->setTransactionType(self::REQUEST_TYPE_AUTH_CAPTURE);
+                $request=$this->_buildRequest($payment);
+                $result =$this->_postRequest($request);
+                        if ($result->getResult() == self::RESPONSE_CODE_APPROVED && $result->getMessage() != 'DUPLICATE') {
+                                $payment->setStatus(self::STATUS_APPROVED);
+                                $payment->setLastTransId($result->getRrno());
+                                if (!$payment->getParentTransactionId() || $result->getRrno() != $payment->getParentTransactionId()) {
+                                    $payment->setTransactionId($result->getRrno());
+                                }
+                                return $this;
+                        } else {
+                        throw new \Magento\Framework\Exception\LocalizedException(Mage::helper('paygate')->__('Error: ' . $result->getMessage()));
+                    }
+            } else {
+                throw new \Magento\Framework\Exception\LocalizedException(__('Error: ' . $result->getMessage()));
+            }
+        default:
+            throw new \Magento\Framework\Exception\LocalizedException(__('An error has occured with your payment.'));
+    }
         throw new \Magento\Framework\Exception\LocalizedException(__('Error in capturing the payment.'));
     }
-	
+    
 
     /**
      * Void the payment through gateway
@@ -307,15 +302,15 @@ class ECheckPayment extends \Magento\Payment\Model\Method\Cc
     public function void(\Magento\Payment\Model\InfoInterface $payment)
     {
         if ($payment->getParentTransactionId()) {
-			$order = $payment->getOrder();
+            $order = $payment->getOrder();
             $payment->setTransactionType(self::REQUEST_TYPE_CREDIT);
-			$payment->setAmount($amount);
-			$payment->setRrno($payment->getParentTransactionId());
+            $payment->setAmount($amount);
+            $payment->setRrno($payment->getParentTransactionId());
             $request = $this->_buildRequest($payment);
             $result = $this->_postRequest($request);
             if ($result->getResult()==self::RESPONSE_CODE_APPROVED) {
                  $payment->setStatus(self::STATUS_APPROVED);
-				 $order->setState(\Magento\Sales\Model\Order::STATE_CANCELED, true)->save();
+                 $order->setState(\Magento\Sales\Model\Order::STATE_CANCELED, true)->save();
                  return $this;
             }
             $payment->setStatus(self::STATUS_ERROR);
@@ -332,8 +327,8 @@ class ECheckPayment extends \Magento\Payment\Model\Method\Cc
     {
         if ($payment->getRefundTransactionId() && $amount > 0) {
             $payment->setTransactionType(self::REQUEST_TYPE_CREDIT);
-			$payment->setRrno($payment->getRefundTransactionId());
-			$payment->setAmount($amount);
+            $payment->setRrno($payment->getRefundTransactionId());
+            $payment->setAmount($amount);
             $request = $this->_buildRequest($payment);
             $request->setRrno($payment->getRefundTransactionId());
             $result = $this->_postRequest($request);
@@ -341,12 +336,12 @@ class ECheckPayment extends \Magento\Payment\Model\Method\Cc
                 $payment->setStatus(self::STATUS_SUCCESS);
                 return $this;
             }
-			if ($result->getResult()==self::RESPONSE_CODE_DECLINED) {
+            if ($result->getResult()==self::RESPONSE_CODE_DECLINED) {
                 throw new \Magento\Framework\Exception\LocalizedException($this->_wrapGatewayError('DECLINED'));
             }
-			if ($result->getResult()==self::RESPONSE_CODE_ERROR) {
+            if ($result->getResult()==self::RESPONSE_CODE_ERROR) {
                 throw new \Magento\Framework\Exception\LocalizedException($this->_wrapGatewayError('ERROR'));
-            }			
+            }           
             throw new \Magento\Framework\Exception\LocalizedException($this->_wrapGatewayError($result->getRrno()));
         }
         throw new \Magento\Framework\Exception\LocalizedException(__('Error in refunding the payment.'));
@@ -366,15 +361,15 @@ class ECheckPayment extends \Magento\Payment\Model\Method\Cc
         }
         $request->setMode(($this->getConfigData('trans_mode') == 'TEST') ? 'TEST' : 'LIVE');
 
-	if ($payment->getAdditionalData() && !$payment->getRrno()) {
-	    $request->setRrno($payment->getAdditionalData());
-	    $payment->setRrno($payment->getAdditionalData());
-	}
+    if ($payment->getAdditionalData() && !$payment->getRrno()) {
+        $request->setRrno($payment->getAdditionalData());
+        $payment->setRrno($payment->getAdditionalData());
+    }
 
         $request->setMerchant($this->getConfigData('account_id'))
             ->setTransactionType($payment->getTransactionType())
             ->setPaymentType($payment->getPaymentType())
-			->setTamperProofSeal($this->calcTPS($payment));
+            ->setTamperProofSeal($this->calcTPS($payment));
         if($payment->getAmount()){
             $request->setAmount($payment->getAmount(),2);
         }
@@ -388,21 +383,21 @@ class ECheckPayment extends \Magento\Payment\Model\Method\Cc
                 $request->setRrno($payment->getCcTransId());
                 break;
         }
-		$cart = $this->checkoutCartHelper->getCart()->getItemsCount();
-		$cartSummary = $this->checkoutCartHelper->getCart()->getSummaryQty();
-		$this->generic;
-		$session = $this->checkoutSession;
+        $cart = $this->checkoutCartHelper->getCart()->getItemsCount();
+        $cartSummary = $this->checkoutCartHelper->getCart()->getSummaryQty();
+        $this->generic;
+        $session = $this->checkoutSession;
 
-		$comment = "";
+        $comment = "";
 
-		foreach ($session->getQuote()->getAllItems() as $item) {
+        foreach ($session->getQuote()->getAllItems() as $item) {
     
-			$comment .= $item->getQty() . ' ';
-			$comment .= '[' . $item->getSku() . ']' . ' ';
-			$comment .= $item->getName() . ' ';
-			$comment .= $item->getDescription() . ' ';
-			$comment .= $item->getAmount() . ' ';
-		}
+            $comment .= $item->getQty() . ' ';
+            $comment .= '[' . $item->getSku() . ']' . ' ';
+            $comment .= $item->getName() . ' ';
+            $comment .= $item->getDescription() . ' ';
+            $comment .= $item->getAmount() . ' ';
+        }
 
         if (!empty($order)) {
             $billing = $order->getBillingAddress();
@@ -427,8 +422,8 @@ class ECheckPayment extends \Magento\Payment\Model\Method\Cc
         switch ($payment->getPaymentType()) {
             case self::REQUEST_METHOD_CC:
                 if($payment->getCcNumber()){
-		    $temp = $payment->getCcExpYear();
-	       	    $CcExpYear = str_split($temp, 2);
+            $temp = $payment->getCcExpYear();
+                $CcExpYear = str_split($temp, 2);
                     $request->setCcNum($payment->getCcNumber())
                         ->setCcExpires(sprintf('%02d%02d', $payment->getCcExpMonth(), $CcExpYear[1]))
                         ->setCvccvv2($payment->getCcCid());
@@ -447,40 +442,41 @@ class ECheckPayment extends \Magento\Payment\Model\Method\Cc
 
     protected function _postRequest(\Magento\Framework\DataObject $request)
     {
-       	$debugData = array('request' => $request->getData());
-       	$result = $this->responseFactory->create();
-	if (isset($_POST["?Result"])) {
-		$_POST["Result"] = $_POST["?Result"];
-		unset($_POST["?Result"]);
-	}
-	if (!isset($_POST["Result"])) {
-        	$client = $this->zendClientFactory->create();
-        	$uri = self::CGI_URL;
-        	$client->setUri($uri ? $uri : self::CGI_URL);
-        	$client->setConfig(array(
-            	'maxredirects'=>0,
-            	'timeout'=>15,
-		'useragent'=>'BluePay Magento Credit Card Plugin/' . self::CURRENT_VERSION,
-       		));
-        	$client->setParameterPost($request->getData());
-		    //$comma_separated = implode(",", $request->getData());
-        	$client->setMethod(\Zend_Http_Client::POST);
-        	try {
-            	    $response = $client->request();
-        	}
-        	catch (Exception $e) {
-            	    $debugData['result'] = $result->getData();
-            	    $this->_debug($debugData);
+        $result = $this->responseFactory->create();
+    if (isset($_POST["?Result"])) {
+        $_POST["Result"] = $_POST["?Result"];
+        unset($_POST["?Result"]);
+    }
+    if (!isset($_POST["Result"])) {
+            $client = $this->zendClientFactory->create();
+            $uri = self::CGI_URL;
+            $client->setUri($uri ? $uri : self::CGI_URL);
+            $client->setConfig(array(
+                'maxredirects'=>0,
+                'timeout'=>15,
+        'useragent'=>'BluePay Magento Credit Card Plugin/' . self::CURRENT_VERSION,
+            ));
+            $client->setParameterPost($request->getData());
+            //$comma_separated = implode(",", $request->getData());
+            $client->setMethod(\Zend_Http_Client::POST);
+            try {
+                    $response = $client->request();
+            }
+            catch (Exception $e) {
+                if ($this->getConfigData('debug')) {
+                    $debugData['result'] = $result->getData();
+                    $this->_debug($debugData);
                     throw new \Magento\Framework\Exception\LocalizedException($this->_wrapGatewayError($e->getMessage()));
-        	}
-		$r = substr($response->getHeader('location'), strpos($response->getHeader('location'), "?") + 1);
-        	if ($r) {
+                }
+            }
+        $r = substr($response->getHeader('location'), strpos($response->getHeader('location'), "?") + 1);
+            if ($r) {
                     parse_str($r, $responseFromBP);
-            	    isset($responseFromBP["Result"]) ? $result->setResult($responseFromBP["Result"]) : 
+                    isset($responseFromBP["Result"]) ? $result->setResult($responseFromBP["Result"]) : 
                         $result->setResult('');
                     isset($responseFromBP["INVOICE_ID"]) ? $result->setInvoiceId($responseFromBP["INVOICE_ID"]) :
                         $result->setInvoiceId('');
-					isset($responseFromBP["BANK_NAME"]) ? $result->setBankName($responseFromBP["BANK_NAME"]) :
+                    isset($responseFromBP["BANK_NAME"]) ? $result->setBankName($responseFromBP["BANK_NAME"]) :
                         $result->setBankName('');
                     isset($responseFromBP["MESSAGE"]) ? $result->setMessage($responseFromBP["MESSAGE"]) :
                         $result->setMessage('');
@@ -498,57 +494,66 @@ class ECheckPayment extends \Magento\Payment\Model\Method\Cc
                         $result->setOrderId('');
                     isset($responseFromBP["CVV2"]) ? $result->setCvv2($responseFromBP["CVV2"]) :
                         $result->setCvv2('');
-		    $this->assignBluePayToken($result->getRrno());
-        	} 
-        	else {
-             	    throw new \Magento\Framework\Exception\LocalizedException(__('Error in payment gateway.'));
-        	}
+            $this->assignBluePayToken($result->getRrno());
+            } 
+            else {
+                    throw new \Magento\Framework\Exception\LocalizedException(__('Error in payment gateway.'));
+            }
 
-        	$debugData['result'] = $result->getData();
-        	$this->_debug($debugData);
-	} else {
-		$result->setResult($_POST["Result"]);
-		$result->setMessage($_POST["MESSAGE"]);
-		$result->setRrno($_POST["RRNO"]);
-		$result->setCcNumber($_POST["PAYMENT_ACCOUNT"]);
-		$result->setCcExpMonth($_POST["CC_EXPIRES_MONTH"]);
-		$result->setCcExpYear($_POST["CC_EXPIRES_YEAR"]);
-		$result->setPaymentType($_POST["PAYMENT_TYPE"]);
-		$result->setCardType($_POST["CARD_TYPE"]);
-		$result->setAuthCode($_POST["AUTH_CODE"]);
-		$result->setAvs($_POST["AVS"]);
-		$result->setCvv2($_POST["CVV2"]);
-		$this->assignBluePayToken($result->getRrno());
-	}
+            if ($this->getConfigData('debug')) {
+                $requestDebug = clone $request;
+                foreach ($this->_debugReplacePrivateDataKeys as $key) {
+                    if ($requestDebug->hasData($key)) {
+                        $requestDebug->setData($key, '***');
+                    }
+                }
+                $debugData = array('request' => $requestDebug);
+                $debugData['result'] = $result->getData();
+                $this->_debug($debugData);
+            }
+    } else {
+        $result->setResult($_POST["Result"]);
+        $result->setMessage($_POST["MESSAGE"]);
+        $result->setRrno($_POST["RRNO"]);
+        $result->setCcNumber($_POST["PAYMENT_ACCOUNT"]);
+        $result->setCcExpMonth($_POST["CC_EXPIRES_MONTH"]);
+        $result->setCcExpYear($_POST["CC_EXPIRES_YEAR"]);
+        $result->setPaymentType($_POST["PAYMENT_TYPE"]);
+        $result->setCardType($_POST["CARD_TYPE"]);
+        $result->setAuthCode($_POST["AUTH_CODE"]);
+        $result->setAvs($_POST["AVS"]);
+        $result->setCvv2($_POST["CVV2"]);
+        $this->assignBluePayToken($result->getRrno());
+    }
         return $result;
     }
 
     protected function _checkDuplicate(\Magento\Payment\Model\InfoInterface $payment)
     {
-	if ($this->getConfigData('duplicate_check') == '0') {
-		return;
-	}
-	$order = $payment->getOrder();
-	$billing = $order->getBillingAddress();
-	$reportStart = date("Y-m-d H:i:s", time() - (3600 * 5) - $this->getConfigData('duplicate_check'));
-	$reportEnd = date("Y-m-d H:i:s", time() - (3600 * 5));
-	$hashstr = $this->getConfigData('secret_key') . $this->getConfigData('account_id') .
-	$reportStart . $reportEnd;
-	$request = $this->requestFactory->create();
+    if ($this->getConfigData('duplicate_check') == '0') {
+        return;
+    }
+    $order = $payment->getOrder();
+    $billing = $order->getBillingAddress();
+    $reportStart = date("Y-m-d H:i:s", time() - (3600 * 5) - $this->getConfigData('duplicate_check'));
+    $reportEnd = date("Y-m-d H:i:s", time() - (3600 * 5));
+    $hashstr = $this->getConfigData('secret_key') . $this->getConfigData('account_id') .
+    $reportStart . $reportEnd;
+    $request = $this->requestFactory->create();
         $request->setData("MODE", $this->getConfigData('trans_mode') == 'TEST' ? 'TEST' : 'LIVE');
         $request->setData("TAMPER_PROOF_SEAL", bin2hex(md5($hashstr, true)));
-	$request->setData("ACCOUNT_ID", $this->getConfigData('account_id'));
-	$request->setData("REPORT_START_DATE", $reportStart);
-	$request->setData("REPORT_END_DATE", $reportEnd);
-	$request->setData("EXCLUDE_ERRORS", 1);
-	$request->setData("ISNULL_f_void", 1);
-	$request->setData("name1", $billing['firstname']);
-	$request->setData("name2", $billing['lastname']);
-	$request->setData("amount", $payment->getAmount());
-	$request->setData("status", '1');
-	$request->setData("IGNORE_NULL_STR", '0');
-	$request->setData("trans_type", "SALE");
- 	$client = $this->zendClientFactory->create();
+    $request->setData("ACCOUNT_ID", $this->getConfigData('account_id'));
+    $request->setData("REPORT_START_DATE", $reportStart);
+    $request->setData("REPORT_END_DATE", $reportEnd);
+    $request->setData("EXCLUDE_ERRORS", 1);
+    $request->setData("ISNULL_f_void", 1);
+    $request->setData("name1", $billing['firstname']);
+    $request->setData("name2", $billing['lastname']);
+    $request->setData("amount", $payment->getAmount());
+    $request->setData("status", '1');
+    $request->setData("IGNORE_NULL_STR", '0');
+    $request->setData("trans_type", "SALE");
+    $client = $this->zendClientFactory->create();
 
         $client->setUri($uri ? $uri : self::STQ_URL);
         $client->setConfig(array(
@@ -561,26 +566,24 @@ class ECheckPayment extends \Magento\Payment\Model\Method\Cc
             $response = $client->request();
         }
         catch (Exception $e) {
-
-            $this->_debug($debugData);
             throw new \Magento\Framework\Exception\LocalizedException($this->_wrapGatewayError($e->getMessage()));
         }
-	$p = parse_str($client->request()->getBody());
+    $p = parse_str($client->request()->getBody());
         if ($id) {
-	    $conn = $this->resourceConnection->getConnection('core_read'); 
-	    $result = $conn->fetchAll("SELECT * FROM sales_payment_transaction WHERE txn_id='$id'");
-	    if ($result)
-		return;
-	    self::$_dupe = true;
-	    $payment->setTransactionType(self::REQUEST_TYPE_CREDIT);
+        $conn = $this->resourceConnection->getConnection('core_read'); 
+        $result = $conn->fetchAll("SELECT * FROM sales_payment_transaction WHERE txn_id='$id'");
+        if ($result)
+        return;
+        self::$_dupe = true;
+        $payment->setTransactionType(self::REQUEST_TYPE_CREDIT);
         $payment->setCcTransId($id);
-	    $payment->setRrno($id);
+        $payment->setRrno($id);
         $request = $this->_buildRequest($payment);
         $result = $this->_postRequest($request);
-	    $payment->setCcTransId('');
+        $payment->setCcTransId('');
         } 
     }
-	
+    
 
     /**
      * Gateway response wrapper
@@ -589,26 +592,26 @@ class ECheckPayment extends \Magento\Payment\Model\Method\Cc
     {
         return Mage::helper('paygate')->__('Gateway error: %s', $text);
     }
-	
-	protected final function calcTPS(\Magento\Payment\Model\InfoInterface $payment) {
-	
-		$order = $payment->getOrder();
-		$billing = $order->getBillingAddress();
+    
+    protected final function calcTPS(\Magento\Payment\Model\InfoInterface $payment) {
+    
+        $order = $payment->getOrder();
+        $billing = $order->getBillingAddress();
 
-		$hashstr = $this->getConfigData('secret_key') . $this->getConfigData('account_id') . 
-		$payment->getTransactionType() . $payment->getAmount() . $payment->getRrno() . 
-		$this->getConfigData('trans_mode');
-		return bin2hex( md5($hashstr, true) );
-	}	
+        $hashstr = $this->getConfigData('secret_key') . $this->getConfigData('account_id') . 
+        $payment->getTransactionType() . $payment->getAmount() . $payment->getRrno() . 
+        $this->getConfigData('trans_mode');
+        return bin2hex( md5($hashstr, true) );
+    }   
  
-	protected function parseHeader($header, $nameVal, $pos) {
-		$nameVal = ($nameVal == 'name') ? '0' : '1';
-		$s = explode("?", $header);
-		$t = explode("&", $s[1]);
-		$value = explode("=", $t[$pos]);
-		return $value[$nameVal];
-	}
-	
+    protected function parseHeader($header, $nameVal, $pos) {
+        $nameVal = ($nameVal == 'name') ? '0' : '1';
+        $s = explode("?", $header);
+        $t = explode("&", $s[1]);
+        $value = explode("=", $t[$pos]);
+        return $value[$nameVal];
+    }
+    
     public function validate()
     {
         $info = $this->getInfoInstance();
@@ -640,15 +643,15 @@ class ECheckPayment extends \Magento\Payment\Model\Method\Cc
             ->setCcSsIssue($data->getCcSsIssue())
             ->setCcSsStartMonth($data->getCcSsStartMonth())
             ->setCcSsStartYear($data->getCcSsStartYear())
-	        ->setAdditionalData($data->getBpToken());
+            ->setAdditionalData($data->getBpToken());
         return $this;
 
     }
 
     public function assignBluePayToken($token)
     {
-	$info = $this->getInfoInstance();
-	$info->setAdditionalData($token);
+    $info = $this->getInfoInstance();
+    $info->setAdditionalData($token);
     }
 
     public function prepareSave()
@@ -657,19 +660,19 @@ class ECheckPayment extends \Magento\Payment\Model\Method\Cc
         if ($this->_canSaveCc) {
             $info->setCcNumberEnc($info->encrypt('xxxx-'.$info->getCcLast4()));
         }
-		if ($info->getAdditionalData()) {
-			$info->setAdditionalData($info->getAdditionalData());
-		}
+        if ($info->getAdditionalData()) {
+            $info->setAdditionalData($info->getAdditionalData());
+        }
 
         //$info->setCcCidEnc($info->encrypt($info->getCcCid()));
         $info->setCcNumber(null)
             ->setCcCid(null);
         return $this;
 
-    }	
-	
-	public function hasVerificationBackend()
-	{
+    }   
+    
+    public function hasVerificationBackend()
+    {
         $configData = $this->getConfigData('useccv_backend');
         if(is_null($configData)){
             return true;
