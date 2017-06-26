@@ -1,4 +1,8 @@
 # BluePay_ECheck_M2
+
+*** THIS EXTENSION IS DEPRECATED. PLEASE REFER TO THE MAGENTO 2 CC & ACH MODULE FOUND HERE: https://github.com/jslingerland/BluePay_Payment_M2
+***
+
 BluePay E-Check payment module for Magento 2. If you are looking for the Magento 1.x.x.x payment module, [Click here](https://www.magentocommerce.com/magento-connect/bluepay-echeck.html)
 
 Since this module links your Magento store to the BluePay gateway, a gateway account is required. If you don't already have one, [Click here](https://www.bluepay.com/contact-us/get-started/) to start the sign up process.
